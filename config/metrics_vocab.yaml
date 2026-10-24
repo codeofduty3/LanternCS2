@@ -1,0 +1,52 @@
+# Metric vocabulary (Lab 13 discussion; seed for CS2 Part 1).
+# xbrl: us-gaap concepts in priority order (first one a filer reports wins).
+# dataroom: the seller-workbook line that maps to the metric (sheet: row label).
+# Derived metrics carry a formula instead and inherit the lowest input tier.
+revenue:
+  unit: USD
+  xbrl: [RevenueFromContractWithCustomerExcludingAssessedTax, RevenueFromContractWithCustomerIncludingAssessedTax, Revenues]
+  dataroom: {sheet: "P&L", row: "Revenue", scale: 1.0e6}
+revenue_growth:
+  unit: pure
+  derived: "revenue[t] / revenue[t-1] - 1"
+gross_margin:
+  unit: pure
+  xbrl_gross_profit: [GrossProfit]
+  xbrl_cost_fallback: [CostOfRevenue, CostOfGoodsAndServicesSold]   # GrossProfit = revenue - cost when GrossProfit is not tagged (AKAM)
+  derived: "gross_profit / revenue"
+  dataroom: {sheet: "P&L", row: "Gross profit", scale: 1.0e6}
+ebitda:
+  unit: USD
+  derived: "OperatingIncomeLoss + DepreciationDepletionAndAmortization"   # not a GAAP line; same definition for every comp
+  dataroom: {sheet: "P&L", row: "EBITDA", scale: 1.0e6}
+adjusted_ebitda:
+  unit: USD
+  non_gaap: true          # seller-defined add-backs; tier 3 only when it comes from the workbook, never comparable to comps' EBITDA
+  dataroom: {sheet: "P&L", row: "Adjusted EBITDA", scale: 1.0e6}
+ebitda_margin:
+  unit: pure
+  derived: "ebitda / revenue"
+arr:
+  unit: USD
+  non_gaap: true          # KPI, no XBRL concept
+  dataroom: {sheet: "KPIs", row: "ARR (USD millions)", scale: 1.0e6}
+nrr:
+  unit: pure
+  non_gaap: true
+  dataroom: {sheet: "KPIs", row: "Net revenue retention", scale: 1.0}
+gross_logo_churn:
+  unit: pure
+  non_gaap: true
+  dataroom: {sheet: "KPIs", row: "Gross logo churn", scale: 1.0}
+top1_customer_share:
+  unit: pure
+  xbrl: [ConcentrationRiskPercentage1]   # only when the filer discloses a >10% customer
+  dataroom: {sheet: "Customers", row: 1, column: "Share of FY2025 revenue", scale: 1.0}
+top10_customer_share:
+  unit: pure
+  derived: "sum of the top 10 rows of Customers"
+  dataroom: {sheet: "Customers", rows: "1-10", column: "Share of FY2025 revenue", scale: 1.0}
+headcount:
+  unit: count
+  xbrl_dei: [EntityNumberOfEmployees]    # rarely tagged; usually read from Item 1 text
+  dataroom: null                         # not in Wren's workbook
